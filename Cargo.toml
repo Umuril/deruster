@@ -1,0 +1,8 @@
+[package]
+name = "deruster"
+version = "0.1.0"
+edition = "2021"
+
+[dependencies]
+iced-x86 = "1.21.0"
+object = "0.36.5"
