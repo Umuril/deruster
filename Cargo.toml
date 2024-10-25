@@ -6,4 +6,5 @@ edition = "2021"
 [dependencies]
 iced-x86 = "1.21.0"
 object = "0.36.5"
+rangemap = "1.5.1"
 
