@@ -2,11 +2,18 @@ use crate::ast::*;
 use iced_x86::{Code, Instruction, OpKind};
 
 pub fn to_expression(
-    _current_stack: &mut Vec<u64>,
+    _current_stack: &mut Vec<Lit>,
     symbols: &mut Vec<Symbol>,
     inst: Instruction,
 ) -> Expr {
     match inst.code() {
+        iced_x86::Code::Push_r64 => {
+            _current_stack.push(get_new_symbol_from_inst(symbols, inst, 0));
+            return Expr {
+                id: 0,
+                kind: ExprKind::Lit(Lit::StillUnknown),
+            };
+        },
         iced_x86::Code::Call_rm64 => {
             if inst.op0_kind() == OpKind::Memory {
                 return Expr {
@@ -27,7 +34,9 @@ pub fn to_expression(
                     kind: ExprKind::Assign(
                         Box::new(Expr {
                             id: 0,
-                            kind: ExprKind::Lit(Lit::Symbol(get_new_symbol(symbols))),
+                            kind: ExprKind::Lit(get_new_symbol_from_inst(
+                                symbols, inst, 0,
+                            )),
                         }),
                         Box::new(Expr {
                             id: 0,
@@ -42,11 +51,15 @@ pub fn to_expression(
                     BinOpKind::BitXor,
                     Box::new(Expr {
                         id: 0,
-                        kind: ExprKind::Lit(Lit::Symbol(get_new_symbol(symbols))),
+                        kind: ExprKind::Lit(get_new_symbol_from_inst(
+                            symbols, inst, 0,
+                        )),
                     }),
                     Box::new(Expr {
                         id: 0,
-                        kind: ExprKind::Lit(Lit::Symbol(get_new_symbol(symbols))),
+                        kind: ExprKind::Lit(get_new_symbol_from_inst(
+                            symbols, inst, 1,
+                        )),
                     }),
                 ),
             };
@@ -57,23 +70,26 @@ pub fn to_expression(
                 kind: ExprKind::Assign(
                     Box::new(Expr {
                         id: 0,
-                        kind: ExprKind::Lit(Lit::Symbol(get_new_symbol(symbols))),
+                        kind: ExprKind::Lit(get_new_symbol_from_inst(
+                            symbols, inst, 0,
+                        )),
                     }),
                     Box::new(Expr {
                         id: 0,
-                        kind: ExprKind::Lit(Lit::Symbol(get_new_symbol(symbols))),
+                        kind: ExprKind::Lit(get_new_symbol_from_inst(
+                            symbols, inst, 1,
+                        )),
                     }),
                 ),
             };
         }
         Code::And_rm64_imm8 => {
-            let rsp = get_new_symbol(symbols);
             return Expr {
                 id: 0,
                 kind: ExprKind::Assign(
                     Box::new(Expr {
                         id: 0,
-                        kind: ExprKind::Lit(Lit::Symbol(rsp)),
+                        kind: ExprKind::Lit(get_new_symbol_from_inst(symbols, inst, 0)),
                     }),
                     Box::new(Expr {
                         id: 0,
@@ -81,11 +97,11 @@ pub fn to_expression(
                             BinOpKind::And,
                             Box::new(Expr {
                                 id: 0,
-                                kind: ExprKind::Lit(Lit::Symbol(rsp)),
+                                kind: ExprKind::Lit(get_new_symbol_from_inst(symbols, inst, 0)),
                             }),
                             Box::new(Expr {
                                 id: 0,
-                                kind: ExprKind::Lit(Lit::Symbol(get_new_symbol(symbols))),
+                                kind: ExprKind::Lit(get_new_symbol_from_inst(symbols, inst, 1)),
                             }),
                         ),
                     }),

@@ -1,14 +1,13 @@
 use crate::parser::to_expression;
-use ast::Symbol;
+use ast::{Lit, Symbol};
 use iced_x86::Decoder;
-use memory::Memory;
-use object::{Object, ObjectSegment};
+use memory::memory::Memory;
+use object::Object;
 use rangemap::RangeMap;
 use std::error::Error;
 use std::fs;
 mod ast;
 mod parser;
-use object::ObjectSection;
 
 mod memory;
 
@@ -25,18 +24,19 @@ fn main() -> Result<(), Box<dyn Error>> {
     println!("Data: {:x?} 0x{:x}", &data[0..20], binary_data.len());
 
     let mut functions = Vec::<u64>::new();
-    let mut stack = Vec::<u64>::new();
+    let mut stack = Vec::<Lit>::new();
     let mut symbols = Vec::<Symbol>::new();
 
-    let mut vm_mappings = RangeMap::<u64, u64>::new();
+    let _vm_mappings = RangeMap::<u64, u64>::new();
 
-    let memory = Memory::from_binary(&binary_data);
+    let _memory = Memory::from_binary(&binary_data);
     // dbg!(&memory);
 
-    let sect = file.section_by_name(".eh_frame");
-    dbg!(sect);
+    let _sect = file.section_by_name(".eh_frame");
+    // dbg!(sect);
 
-    functions.push(file.entry());
+    // functions.push(file.entry());
+    functions.push(0x1161u64);
 
     // dbg!(&file.symbol_map());
     // dbg!(&file.symbol_table());
@@ -65,10 +65,14 @@ fn main() -> Result<(), Box<dyn Error>> {
                 dbg!(&inst);
                 println!("0x{:X}", &inst.memory_displacement64());
             }
-            println!("{}", &expr);
+            println!("{} {:?}", &expr, &stack);
 
-            if let ast::ExprKind::Call(func, _) = expr.kind {
-                functions.push(func);
+            // if let ast::ExprKind::Call(func, _) = expr.kind {
+            //     functions.push(func);
+            // }
+
+            if inst.code() == iced_x86::Code::Retnq {
+                break;
             }
 
             if inst.code() == iced_x86::Code::Hlt {
